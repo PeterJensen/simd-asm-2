@@ -118,7 +118,7 @@ function asmjsModule (global, imp, buffer) {
   var b8 = new global.Uint8Array(buffer);
   var toF = global.Math.fround;
   var i4  = global.SIMD.int32x4;
-  var i4c = typeof global.SIMD.int32x4.check !== "undefined" ? global.SIMD.int32x4.check : global.SIMD.int32x4;
+  var i4check = typeof global.SIMD.int32x4.check !== "undefined" ? global.SIMD.int32x4.check : global.SIMD.int32x4;
   var f4 = global.SIMD.float32x4;
   var i4add = i4.add;
   var i4and = i4.and;
@@ -196,7 +196,7 @@ function asmjsModule (global, imp, buffer) {
       z_im4   = f4add(c_im4, new_im4);
       count4  = i4add(count4, i4and(mi4, one4));
     }
-    return i4c(count4);
+    return i4check(count4);
   }
 
   function mandelColumnX4 (x, width, height, xf, yf, yd, max_iterations) {
@@ -214,7 +214,7 @@ function asmjsModule (global, imp, buffer) {
 
     ydx4 = toF(yd * toF(4));
     for (y = 0; (y | 0) < (height | 0); y = (y + 4) | 0) {
-      m4   = i4c(mandelPixelX4(toF(xf), toF(yf), toF(yd), max_iterations));
+      m4   = i4check(mandelPixelX4(toF(xf), toF(yf), toF(yd), max_iterations));
       mapColorAndSetPixel(x | 0, y | 0,   width, m4.x, max_iterations) | 0;
       mapColorAndSetPixel(x | 0, (y + 1) | 0, width, m4.y, max_iterations) | 0;
       mapColorAndSetPixel(x | 0, (y + 2) | 0, width, m4.z, max_iterations) | 0;
