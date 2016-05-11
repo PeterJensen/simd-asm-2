@@ -116,20 +116,22 @@ var canvas = function () {
 function asmjsModule (global, imp, buffer) {
   "use asm"
   var b8 = new global.Uint8Array(buffer);
+  var b4 = global.SIMD.Bool32x4;
   var toF = global.Math.fround;
   var i4 = global.SIMD.Int32x4;
   var f4 = global.SIMD.Float32x4;
   var i4check = i4.check;
   var i4add = i4.add;
-  var i4and = i4.and;
+  var i4sel = i4.select;
   var i4ext = i4.extractLane;
+  var b4any = b4.anyTrue;
   var f4add = f4.add;
   var f4sub = f4.sub;
   var f4mul = f4.mul;
   var f4lessThanOrEqual = f4.lessThanOrEqual;
   var f4splat = f4.splat;
   var imul = global.Math.imul;
-  var one4 = i4(1,1,1,1), two4 = f4(2.0,2.0,2.0,2.0), four4 = f4(4.0,4.0,4.0,4.0);
+  var zero4 = i4(0, 0, 0, 0), one4 = i4(1,1,1,1), two4 = f4(2.0,2.0,2.0,2.0), four4 = f4(4.0,4.0,4.0,4.0);
 
   var mk0 = 0x007fffff;
   function declareHeapLength() {
@@ -174,7 +176,7 @@ function asmjsModule (global, imp, buffer) {
     var z_re24 = f4(0.0,0.0,0.0,0.0), z_im24 = f4(0.0,0.0,0.0,0.0);
     var new_re4 = f4(0.0,0.0,0.0,0.0), new_im4 = f4(0.0,0.0,0.0,0.0);
     var i = 0;
-    var mi4 = i4(0,0,0,0);
+    var mb4 = b4(0, 0, 0, 0);
 
     c_re4 = f4splat(xf);
     c_im4 = f4(yf, toF(yd + yf), toF(yd + toF(yd + yf)), toF(yd + toF(yd + toF(yd + yf))));
@@ -186,16 +188,16 @@ function asmjsModule (global, imp, buffer) {
       z_re24 = f4mul(z_re4, z_re4);
       z_im24 = f4mul(z_im4, z_im4);
 
-      mi4 = f4lessThanOrEqual(f4add(z_re24, z_im24), four4);
+      mb4 = f4lessThanOrEqual(f4add(z_re24, z_im24), four4);
       // If all 4 values are greater than 4.0, there's no reason to continue.
-      if ((mi4.signMask | 0) == 0x00)
+      if (!(b4any(mb4)|0))
         break;
 
       new_re4 = f4sub(z_re24, z_im24);
       new_im4 = f4mul(f4mul(two4, z_re4), z_im4);
       z_re4   = f4add(c_re4, new_re4);
       z_im4   = f4add(c_im4, new_im4);
-      count4  = i4add(count4, i4and(mi4, one4));
+      count4  = i4add(count4, i4sel(mb4, one4, zero4));
     }
     return i4check(count4);
   }
